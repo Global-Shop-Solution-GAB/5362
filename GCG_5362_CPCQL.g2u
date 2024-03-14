@@ -1,0 +1,160 @@
+Program.Sub.ScreenSU.Start
+Gui.F_CustomPriceCalc..Create
+Gui.F_CustomPriceCalc..Size(4365,3795)
+Gui.F_CustomPriceCalc..MinX(0)
+Gui.F_CustomPriceCalc..MinY(0)
+Gui.F_CustomPriceCalc..Position(0,0)
+Gui.F_CustomPriceCalc..BackColor(-2147483633)
+Gui.F_CustomPriceCalc..MousePointer(0)
+Gui.F_CustomPriceCalc..Event(UnLoad,F_CustomPriceCalc_UnLoad)
+Gui.F_CustomPriceCalc..Caption("Quote Line Price Calculator")
+Gui.F_CustomPriceCalc.lblLength.Create(Label,"Length in inches",True,1545,255,0,1845,300,True,0,"Arial",8,-2147483633,0)
+Gui.F_CustomPriceCalc.lblLength.Anchor(15)
+Gui.F_CustomPriceCalc.txtLength.Create(TextBox,"",True,1215,300,0,1845,660,True,0,"Arial",8,-2147483643,1)
+Gui.F_CustomPriceCalc.txtLength.Anchor(15)
+Gui.F_CustomPriceCalc.txtLength.NumericOnly(1)
+Gui.F_CustomPriceCalc.lblWidth.Create(Label,"Width in inches",True,1935,255,0,225,300,True,0,"Arial",8,-2147483633,0)
+Gui.F_CustomPriceCalc.lblWidth.Anchor(15)
+Gui.F_CustomPriceCalc.txtWidth.Create(TextBox,"",True,1215,300,0,225,660,True,0,"Arial",8,-2147483643,1)
+Gui.F_CustomPriceCalc.txtWidth.Anchor(15)
+Gui.F_CustomPriceCalc.txtWidth.NumericOnly(1)
+Gui.F_CustomPriceCalc.lblPrice.Create(Label,"Price per Square Foot",True,1935,255,0,225,1230,True,0,"Arial",8,-2147483633,0)
+Gui.F_CustomPriceCalc.lblPrice.Anchor(15)
+Gui.F_CustomPriceCalc.txtPrice.Create(TextBox,"",True,1215,300,0,225,1605,True,0,"Arial",8,-2147483643,1)
+Gui.F_CustomPriceCalc.txtPrice.Anchor(15)
+Gui.F_CustomPriceCalc.txtPrice.Event(LostFocus,txtPrice_LostFocus)
+Gui.F_CustomPriceCalc.lblResult.Create(Label,"Result Calculation",True,1935,255,0,225,2235,True,0,"Arial",8,-2147483633,0)
+Gui.F_CustomPriceCalc.lblResult.Anchor(15)
+Gui.F_CustomPriceCalc.txtResult.Create(TextBox,"",True,1215,300,0,225,2595,False,0,"Arial",8,-2147483643,1)
+Gui.F_CustomPriceCalc.txtResult.Anchor(15)
+Gui.F_CustomPriceCalc.txtResult.NumericOnly(1)
+Gui.F_CustomPriceCalc.txtResult.Mask(" ")
+Gui.F_CustomPriceCalc.cmdUpdate.Create(Button)
+Gui.F_CustomPriceCalc.cmdUpdate.Size(1485,375)
+Gui.F_CustomPriceCalc.cmdUpdate.Position(225,3030)
+Gui.F_CustomPriceCalc.cmdUpdate.Caption("Update")
+Gui.F_CustomPriceCalc.cmdUpdate.Event(Click,cmdUpdate_Click)
+Gui.F_CustomPriceCalc.cmdUpdate.Anchor(15)
+Program.Sub.ScreenSU.End
+'The purpose of this script is to determine the price on the quote lines screen based on a custom calculation.
+'Result Calculation = ((Length x width)/144) x Price per Square Foot
+'Scripted by Pablo Salinas
+
+Program.Sub.Preflight.Start
+V.Global.fFinalCalculation.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	'Depending on the hook it changes the name of the script button or it calculates the new price 
+	F.Intrinsic.Control.SelectCase(V.Caller.Hook)
+	
+		'Renames the script 2 button
+		F.Intrinsic.Control.Case(10260)
+			'Script 2 Caption
+			V.Passed.000202.Set("Price Calc")
+			'User Field 1 Caption
+			V.Passed.000025.Set("Width")
+			'User Field 2 Caption
+			V.Passed.000027.Set("Length")
+			'User Field 3 Caption
+			V.Passed.000031.Set("Price Per Sq Ft")
+			'User Field 4 Caption
+			V.Passed.000045.Set("Result Calc")
+			
+		'Calculates the new price
+		F.Intrinsic.Control.Case(10680)
+			F.Intrinsic.Control.If(V.Passed.000052,=,"")
+				F.Intrinsic.UI.Msgbox("Select a Part")
+			F.Intrinsic.Control.Else
+				Gui.F_CustomPriceCalc.txtWidth.TabIndex(0)
+				Gui.F_CustomPriceCalc.txtLength.TabIndex(1)
+				gui.F_CustomPriceCalc..Show
+			F.Intrinsic.Control.EndIf
+
+		'Closes the script
+		F.Intrinsic.Control.CaseElse
+			F.Intrinsic.Control.CallSub(F_Custom_PriceCalc_Unload)
+			
+	F.Intrinsic.Control.EndSelect
+	
+F.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {1}{0}Subroutine: {2} Error: {3} with Description {4}","Prac_App_Exercise2.g2u",V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(v.Local.sError)
+	F.Intrinsic.Control.CallSub(F_CustomPriceCalc_UnLoad)
+F.Intrinsic.Control.EndTry	
+	
+Program.Sub.Main.End
+
+Program.Sub.F_CustomPriceCalc_UnLoad.Start
+F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	'closes the form
+	F.Intrinsic.Control.End
+
+F.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {1}{0}Subroutine: {2} Error: {3} with Description {4}","Prac_App_Exercise2.g2u",V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(v.Local.sError)
+	F.Intrinsic.Control.CallSub(F_CustomPriceCalc_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.F_CustomPriceCalc_UnLoad.End
+
+Program.Sub.cmdUpdate_Click.Start
+F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	'passes the new price the price usd field and closes the form
+	V.Passed.000009.Set(v.Global.fFinalCalculation)
+	V.Passed.000017.Set(V.Global.fFinalCalculation)
+	V.Passed.000015.Set(V.Screen.F_CustomPriceCalc!txtPrice.Text)
+	V.Passed.000023.Set(V.Screen.F_CustomPriceCalc!txtLength.Text)
+	V.Passed.000030.Set(V.Screen.F_CustomPriceCalc!txtWidth.Text)
+	F.Intrinsic.Control.CallSub(F_CustomPriceCalc_UnLoad)
+	
+	
+F.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {1}{0}Subroutine: {2} Error: {3} with Description {4}","Prac_App_Exercise2.g2u",V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(v.Local.sError)
+	F.Intrinsic.Control.CallSub(F_CustomPriceCalc_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdUpdate_Click.End
+
+Program.Sub.txtPrice_LostFocus.Start
+F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.fPrice.Declare
+
+	'Making sure the user did not leave any of the fields blank since you won't be able to calculate the new if price if they are blank.
+	F.Intrinsic.Control.If(V.Screen.F_CustomPriceCalc!txtLength.Caption,=,"","or", V.Screen.F_CustomPriceCalc!txtWidth.Caption,=,"",V.Screen.F_CustomPriceCalc!txtPrice.Caption,=, "")
+		f.Intrinsic.UI.Msgbox("Fields cannot be left blank")
+	F.Intrinsic.Control.Else
+		'formatting price to 4 decimals
+		f.Intrinsic.String.Format(V.Screen.F_CustomPriceCalc!txtPrice.Caption,"0######.####",v.Local.fPrice)
+		
+		'displaying the new price to 4 decimals
+		gui.F_CustomPriceCalc.txtPrice.Text(v.Local.fPrice)
+		
+		'calculating the new price ((Length x width)/144) x Price per Square Foot
+		F.Intrinsic.Math.Evaluate("[V.Screen.F_CustomPriceCalc!txtLength.Caption]*[V.Screen.F_CustomPriceCalc!txtWidth.Caption]/144*[V.Screen.F_CustomPriceCalc!txtPrice.Caption]", v.Global.fFinalCalculation)
+		
+		'formattig the price to 4 decimals
+		f.Intrinsic.String.Format(v.Global.fFinalCalculation,"0######.####",v.Global.fFinalCalculation)
+		
+		'displays the new price
+		Gui.F_CustomPriceCalc.txtResult.Text(v.Global.fFinalCalculation)
+	F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+f.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {1}{0}Subroutine: {2} Error: {3} with Description {4}","Prac_App_Exercise2.g2u",V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(v.Local.sError)
+	F.Intrinsic.Control.CallSub(F_CustomPriceCalc_UnLoad)
+F.Intrinsic.Control.EndTry
+	
+Program.Sub.txtPrice_LostFocus.End
